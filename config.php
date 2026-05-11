@@ -13,23 +13,24 @@
 
 $config = [
     'server_name' => 'Servername',      // Name deines Servers
-    'language'    => 'de',             // 'de', 'en', 'pl' 'ro'
+    'language'    => 'de',              // 'de', 'en', 'pl' 'ro'
 
     // DATENBANK ZUGANGSADATEN
-    'db_host'     => '127.0.0.1',
-    'db_user'     => 'benutzername',
-    'db_pass'     => 'passwort',
+    'db_host'     => '127.0.0.1',       // DB IP
+    'db_port'     => '3306',            // DB Port
+    'db_user'     => 'benutzername',    // DB username
+    'db_pass'     => 'passwort',        // DB password of username
 
     // DATENBANK NAMEN & TABELLEN
     'db_plots'    => 'plotsquared',    // Name PlotSquared DB
-    // TABELLEN-NAMEN - PLOTSQUARED (Normalerweise nicht ändern / do not change)
-    'table_plot'  => 'plot',           // Meistens 'plot'
+    // TABELLEN-NAMEN - PLOTSQUARED (Normalerweise nicht ändern / Normally, this does not change.)
+    'table_plot'  => 'plot',           // Meistens / mostly 'plot'
 
     'db_user_sys' => 'cmi',            // Name CMI DB
-    // TABELLEN-NAMEN - CMI (Normalerweise nicht ändern / do not change)
-    'table_users' => 'CMI_users',      // Meistens 'CMI_users'
+    // TABELLEN-NAMEN - CMI (Normalerweise nicht ändern / Normally, this does not change.e)
+    'table_users' => 'CMI_users',      // Meistens / mostly 'CMI_users'
 
-    // SPALTEN-NAMEN - CMI (Normalerweise nicht ändern / do not change)
+    // SPALTEN-NAMEN - CMI (Normalerweise nicht ändern / Normally, this does not change.)
     'col_uuid'    => 'player_uuid',
     'col_name'    => 'username'
 ];
