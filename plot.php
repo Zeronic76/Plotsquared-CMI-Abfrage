@@ -35,7 +35,7 @@ if (file_exists($lang_file)) {
 
 // --- 3. DATENBANK VERBINDUNG ---
 try {
-    $pdo = new PDO("mysql:host={$config['db_host']};dbname={$config['db_plots']};charset=utf8mb4", $config['db_user'], $config['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $pdo = new PDO("mysql:host={$config['db_host']};port={$config['db_port']};dbname={$config['db_plots']};charset=utf8mb4", $config['db_user'], $config['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 } catch (Exception $e) {
     die("Datenbank-Fehler: " . $e->getMessage());
 }
