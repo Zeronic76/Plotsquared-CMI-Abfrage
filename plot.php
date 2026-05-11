@@ -11,40 +11,45 @@
 
 // --- 1. ZENTRALE KONFIGURATION ---
 $config = [
-    'server_name' => 'DeinServer',            // Hier den Namen eintragen
+    'server_name' => 'DeinServer',            // Name deines Servers || name of server
+    'language'    => 'de',                    // 'de' || 'en' || 'pl' || 'ro' (muss im Ordner lang/ existieren)
+
     'db_host' => '127.0.0.1',                 // IP oder localhost
     'db_user' => 'DEIN_DATENBANK_USER',       // Dein DB-Benutzer
     'db_pass' => 'DEIN_DATENBANK_PASSWORT',   // Dein DB-Passwort
     'db_plots' => 'plotsquared',              // Name der PlotSquared Datenbank
-    'table_plot' => 'plot',
+    'table_plot'  => 'plot',
     'db_user_sys' => 'cmi',                   // Name der CMI Datenbank
     'table_users' => 'CMI_users',
-    'col_uuid' => 'player_uuid',
-    'col_name' => 'username'
+    'col_uuid'    => 'player_uuid',
+    'col_name'    => 'username'
 ];
 
-// Fehleranzeige (für Entwicklung aktiv)
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+// --- 2. SPRACHE LADEN ---
+$lang_file = __DIR__ . "/lang/{$config['language']}.php";
+if (file_exists($lang_file)) {
+    include($lang_file);
+} else {
+    die("Language file not found: " . htmlspecialchars($lang_file));
+}
 
+// --- 3. DATENBANK VERBINDUNG ---
 try {
     $pdo = new PDO("mysql:host={$config['db_host']};dbname={$config['db_plots']};charset=utf8mb4", $config['db_user'], $config['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 } catch (Exception $e) {
     die("Datenbank-Fehler: " . $e->getMessage());
 }
 
-// --- 2. LOGIK ---
+// --- 4. LOGIK ---
 $search = isset($_GET['query']) ? trim($_GET['query']) : '';
 $type = isset($_GET['type']) ? $_GET['type'] : 'name';
 $results = [];
-$playerData = null;
 $displayName = "";
 $uuid = "";
 $errorMsg = "";
 
 if ($search) {
     if ($type === 'name') {
-        // SUCHE ÜBER NAME (Mojang API)
         $api_url = "https://api.mojang.com/users/profiles/minecraft/" . urlencode($search);
         $response = @file_get_contents($api_url);
         if ($response) {
@@ -53,31 +58,29 @@ if ($search) {
             $uuid = substr($raw_uuid, 0, 8) . '-' . substr($raw_uuid, 8, 4) . '-' . substr($raw_uuid, 12, 4) . '-' . substr($raw_uuid, 16, 4) . '-' . substr($raw_uuid, 20);
             $displayName = $mojangdata['name'];
         } else {
-            $errorMsg = "Spielername konnte bei Mojang nicht gefunden werden.";
+            $errorMsg = $lang['error_mojang'];
         }
     } else {
-        // SUCHE ÜBER UUID (Direkt)
         $uuid = $search;
-        // Name aus CMI Datenbank holen für die Anzeige
         $stmtName = $pdo->prepare("SELECT {$config['col_name']} FROM {$config['db_user_sys']}.{$config['table_users']} WHERE {$config['col_uuid']} = ? LIMIT 1");
         $stmtName->execute([$uuid]);
         $dbPlayer = $stmtName->fetch(PDO::FETCH_ASSOC);
-        $displayName = $dbPlayer ? $dbPlayer[$config['col_name']] : "Unbekannter Spieler";
+        $displayName = $dbPlayer ? $dbPlayer[$config['col_name']] : "Unknown Player";
     }
 
     if ($uuid && empty($errorMsg)) {
-        $sql = " SELECT p.world, p.plot_id_x, p.plot_id_z, p.timestamp, 'OWNER' as role, u.{$config['col_name']} as owner_name
+        $sql = " SELECT p.world, p.plot_id_x, p.plot_id_z, 'OWNER' as role, u.{$config['col_name']} as owner_name
                  FROM {$config['table_plot']} p
                  LEFT JOIN {$config['db_user_sys']}.{$config['table_users']} u ON p.owner = u.{$config['col_uuid']}
                  WHERE p.owner = :uuid
                  UNION
-                 SELECT p.world, p.plot_id_x, p.plot_id_z, p.timestamp, 'HELPED' as role, u.{$config['col_name']} as owner_name
+                 SELECT p.world, p.plot_id_x, p.plot_id_z, 'HELPED' as role, u.{$config['col_name']} as owner_name
                  FROM {$config['table_plot']} p
                  INNER JOIN plot_helpers ph ON ph.plot_plot_id = p.id
                  LEFT JOIN {$config['db_user_sys']}.{$config['table_users']} u ON p.owner = u.{$config['col_uuid']}
                  WHERE ph.user_uuid = :uuid
                  UNION
-                 SELECT p.world, p.plot_id_x, p.plot_id_z, p.timestamp, 'TRUSTED' as role, u.{$config['col_name']} as owner_name
+                 SELECT p.world, p.plot_id_x, p.plot_id_z, 'TRUSTED' as role, u.{$config['col_name']} as owner_name
                  FROM {$config['table_plot']} p
                  INNER JOIN plot_trusted pt ON pt.plot_plot_id = p.id
                  LEFT JOIN {$config['db_user_sys']}.{$config['table_users']} u ON p.owner = u.{$config['col_uuid']}
@@ -91,10 +94,10 @@ if ($search) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= $config['language'] ?>">
 <head>
     <meta charset="UTF-8">
-    <title><?= htmlspecialchars($config['server_name']) ?> | Plot-Admin</title>
+    <title><?= htmlspecialchars($config['server_name']) ?> | <?= $lang['title'] ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #0d0d0d; color: #e0e0e0; font-family: sans-serif; }
@@ -109,16 +112,14 @@ if ($search) {
 <body>
 
 <div class="container py-5">
-    <h3 class="mb-4 text-white"><?= htmlspecialchars($config['server_name']) ?> <span class="text-primary">Plot-Admin</span></h3>
-        <span class="badge bg-dark border border-secondary text-white-50">5.2.1</span>
+    <h3 class="mb-4 text-white"><?= htmlspecialchars($config['server_name']) ?> <span class="text-primary"><?= $lang['title'] ?></span></h3>
 
-    <!-- Suchbereich -->
     <div class="card admin-card mb-4 shadow-lg">
         <div class="card-body">
             <form action="" method="GET">
                 <div class="input-group">
                     <input type="text" name="query" class="form-control bg-dark text-white border-secondary"
-                           placeholder="Name oder UUID..." value="<?= htmlspecialchars($search) ?>" required>
+                           placeholder="<?= $lang['search_placeholder'] ?>" value="<?= htmlspecialchars($search) ?>" required>
 
                     <span class="input-group-text">
                         <div class="form-check form-check-inline mb-0">
@@ -131,7 +132,7 @@ if ($search) {
                         </div>
                     </span>
 
-                    <button type="submit" class="btn btn-primary px-4 fw-bold">SUCHEN</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold"><?= $lang['search_btn'] ?></button>
                 </div>
             </form>
         </div>
@@ -140,11 +141,11 @@ if ($search) {
     <?php if ($errorMsg): ?>
         <div class="alert alert-danger border-0"><?= $errorMsg ?></div>
     <?php endif; ?>
-    <!-- Ausgabe -->
+
     <?php if ($uuid && empty($errorMsg)): ?>
         <div class="card admin-card shadow-lg">
             <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-transparent py-3">
-                <span class="text-white-50 font-monospace">Ergebnisse für: <strong class="text-info" style="font-size: 1.2rem;"><?= htmlspecialchars($displayName) ?></strong></span>
+                <span class="text-white-50 font-monospace"><?= $lang['results_for'] ?> <strong class="text-info" style="font-size: 1.2rem;"><?= htmlspecialchars($displayName) ?></strong></span>
                 <small class="text-white-50 font-monospace"><?= htmlspecialchars($uuid) ?></small>
             </div>
 
@@ -153,11 +154,11 @@ if ($search) {
                     <table class="table table-dark table-hover mb-0 text-center">
                         <thead>
                             <tr class="text-muted small">
-                                <th>WELT</th>
-                                <th>KOORDINATEN (X;Z)</th>
-                                <th>BESITZER</th>
-                                <th>AKTION</th>
-                                <th>ROLLE</th>
+                                <th><?= $lang['table_world'] ?></th>
+                                <th><?= $lang['table_coords'] ?></th>
+                                <th><?= $lang['table_owner'] ?></th>
+                                <th><?= $lang['table_action'] ?></th>
+                                <th><?= $lang['table_role'] ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -166,12 +167,12 @@ if ($search) {
                                 <td class="align-middle"><?= htmlspecialchars($plot['world']) ?></td>
                                 <td class="align-middle"><strong><?= $plot['plot_id_x'] ?>;<?= $plot['plot_id_z'] ?></strong></td>
                                 <td class="align-middle text-warning">
-                                    <?= $plot['owner_name'] ? htmlspecialchars($plot['owner_name']) : '<small class="text-muted">Unbekannt</small>' ?>
+                                    <?= $plot['owner_name'] ? htmlspecialchars($plot['owner_name']) : '<small class="text-muted">?</small>' ?>
                                 </td>
                                 <td class="align-middle">
                                     <button class="btn btn-sm btn-outline-light" style="font-size: 0.75rem;"
-                                            onclick="navigator.clipboard.writeText('/plot visit <?= $plot['plot_id_x'] ?>;<?= $plot['plot_id_z'] ?>'); alert('Befehl kopiert!');">
-                                        VISIT KOPIEREN
+                                            onclick="navigator.clipboard.writeText('/plot visit <?= $plot['plot_id_x'] ?>;<?= $plot['plot_id_z'] ?>'); alert('Copied!');">
+                                        <?= $lang['btn_visit'] ?>
                                     </button>
                                 </td>
                                 <td class="align-middle">
@@ -182,7 +183,7 @@ if ($search) {
 
                             <?php if (empty($results)): ?>
                                 <tr>
-                                    <td colspan="5" class="py-5 text-muted italic">Keine Grundstücke gefunden.</td>
+                                    <td colspan="5" class="py-5 text-muted italic"><?= $lang['no_plots'] ?></td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
