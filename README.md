@@ -15,8 +15,8 @@ Ein einfaches Web-Interface, um Grundstücke von Spielern über die Datenbank vo
 * Funktioniert nur wenn die beide Datenbanken auf dem gleichen Server sind.
 
 ## Installation
-1. Lade die `plot.php` auf deinen Webserver hoch.
-2. Öffne die Datei und trage deine Datenbank-Zugangsdaten im `$config` Array ein.
+1. Lade die `plot.php` `config.php` und den Ordner `lang` auf deinen Webserver hoch.
+2. Öffne die Datei `config.php` und trage deine Datenbank-Zugangsdaten ein.
 3. Achte darauf, dass dein Webserver Zugriff auf die MySQL-Ports des Minecraft-Servers hat (Whitelist).
 
 ## Lizenz
