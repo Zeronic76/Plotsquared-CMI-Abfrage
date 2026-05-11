@@ -9,7 +9,6 @@
  * the Free Software Foundation.
  */
 
-// --- 1. ZENTRALE KONFIGURATION ---
 // 1. KONFIGURATION LADEN
 if (file_exists(__DIR__ . '/config.php')) {
     include(__DIR__ . '/config.php');
@@ -25,17 +24,15 @@ if (file_exists($lang_file)) {
     die("Language file not found: " . htmlspecialchars($lang_file));
 }
 
-// --- 2. SPRACHE LADEN ---
-$lang_file = __DIR__ . "/lang/{$config['language']}.php";
-if (file_exists($lang_file)) {
-    include($lang_file);
-} else {
-    die("Language file not found: " . htmlspecialchars($lang_file));
-}
-
 // --- 3. DATENBANK VERBINDUNG ---
+$db_port = !empty($config['db_port']) ? $config['db_port'] : '3306';
+
 try {
-    $pdo = new PDO("mysql:host={$config['db_host']};port={$config['db_port']};dbname={$config['db_plots']};charset=utf8mb4", $config['db_user'], $config['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $dsn = "mysql:host={$config['db_host']};port={$db_port};dbname={$config['db_plots']};charset=utf8mb4";
+    $pdo = new PDO($dsn, $config['db_user'], $config['db_pass'], [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
 } catch (Exception $e) {
     die("Datenbank-Fehler: " . $e->getMessage());
 }
