@@ -93,7 +93,7 @@ if ($search) {
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Block-Topia Plot-Admin</title>
+    <title>Plot-Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #0d0d0d; color: #e0e0e0; font-family: sans-serif; }
