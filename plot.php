@@ -139,7 +139,7 @@ if ($search) {
     <?php if ($errorMsg): ?>
         <div class="alert alert-danger border-0"><?= $errorMsg ?></div>
     <?php endif; ?>
-
+    <!-- Ausgabe -->
     <?php if ($uuid && empty($errorMsg)): ?>
         <div class="card admin-card shadow-lg">
             <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-transparent py-3">
