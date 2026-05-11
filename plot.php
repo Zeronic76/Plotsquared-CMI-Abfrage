@@ -10,20 +10,20 @@
  */
 
 // --- 1. ZENTRALE KONFIGURATION ---
-$config = [
-    'server_name' => 'DeinServer',            // Name deines Servers || name of server
-    'language'    => 'de',                    // 'de' || 'en' || 'pl' || 'ro' (muss im Ordner lang/ existieren)
+// 1. KONFIGURATION LADEN
+if (file_exists(__DIR__ . '/config.php')) {
+    include(__DIR__ . '/config.php');
+} else {
+    die("FEHLER: Die Datei config.php wurde nicht gefunden! Bitte erstelle sie basierend auf der Vorlage.");
+}
 
-    'db_host' => '127.0.0.1',                 // IP oder localhost
-    'db_user' => 'DEIN_DATENBANK_USER',       // Dein DB-Benutzer
-    'db_pass' => 'DEIN_DATENBANK_PASSWORT',   // Dein DB-Passwort
-    'db_plots' => 'plotsquared',              // Name der PlotSquared Datenbank
-    'table_plot'  => 'plot',
-    'db_user_sys' => 'cmi',                   // Name der CMI Datenbank
-    'table_users' => 'CMI_users',
-    'col_uuid'    => 'player_uuid',
-    'col_name'    => 'username'
-];
+// 2. SPRACHE LADEN
+$lang_file = __DIR__ . "/lang/{$config['language']}.php";
+if (file_exists($lang_file)) {
+    include($lang_file);
+} else {
+    die("Language file not found: " . htmlspecialchars($lang_file));
+}
 
 // --- 2. SPRACHE LADEN ---
 $lang_file = __DIR__ . "/lang/{$config['language']}.php";
