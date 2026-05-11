@@ -11,6 +11,7 @@
 
 // --- 1. ZENTRALE KONFIGURATION ---
 $config = [
+    'server_name' => 'DeinServer',            // Hier den Namen eintragen
     'db_host' => '127.0.0.1',                 // IP oder localhost
     'db_user' => 'DEIN_DATENBANK_USER',       // Dein DB-Benutzer
     'db_pass' => 'DEIN_DATENBANK_PASSWORT',   // Dein DB-Passwort
@@ -93,7 +94,7 @@ if ($search) {
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Plot-Admin</title>
+    <title><?= htmlspecialchars($config['server_name']) ?> | Plot-Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #0d0d0d; color: #e0e0e0; font-family: sans-serif; }
@@ -108,7 +109,7 @@ if ($search) {
 <body>
 
 <div class="container py-5">
-    <h3 class="mb-4 text-white">Servername <span class="text-primary">Plot-Admin</span></h3>
+    <h3 class="mb-4 text-white"><?= htmlspecialchars($config['server_name']) ?> <span class="text-primary">Plot-Admin</span></h3>
         <span class="badge bg-dark border border-secondary text-white-50">5.2.1</span>
 
     <!-- Suchbereich -->
