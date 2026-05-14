@@ -29,7 +29,7 @@ return [
 
     // CMI
     'cmi' => [
-        'db'           => 'citybuild',
+        'db'           => 'CMI',
         'table_users'  => 'CMI_users',
         'col_uuid'     => 'player_uuid',
         'col_name'     => 'username'
