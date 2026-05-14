@@ -1,4 +1,4 @@
-# PlotSquared & CMI Web Query
+# PlotSquared & CMI || Luckperms Web Query
 
 Ein einfaches Web-Interface, um Grundstücke von Spielern über die Datenbank von PlotSquared und CMI abzufragen.
 
@@ -11,13 +11,18 @@ Ein einfaches Web-Interface, um Grundstücke von Spielern über die Datenbank vo
 ## Voraussetzungen
 * PHP 7.4 oder höher
 * PDO MySQL Erweiterung
-* Zugriff auf die Datenbanken von **PlotSquared** und **CMI**.
-* Funktioniert nur wenn die beide Datenbanken auf dem gleichen Server sind.
+* Zugriff auf die Datenbanken von **PlotSquared** und **CMI** oder **Luckperms**.
+* Funktioniert nur wenn die Datenbanken auf dem gleichen Server sind.
 
 ## Installation
-1. Lade die `plot.php` `config.php` und den Ordner `lang` auf deinen Webserver hoch.
-2. Öffne die Datei `config.php` und trage deine Datenbank-Zugangsdaten ein.
-3. Achte darauf, dass dein Webserver Zugriff auf die MySQL-Ports des Minecraft-Servers hat (Whitelist).
 
+Dank des neuen Installers ist die Einrichtung in Sekunden erledigt:
+
+1. Lade alle Dateien (inklusive der `install.php`) auf deinen Webserver hoch.
+2. Rufe die `install.php` in deinem Browser auf (z. B. `deinedomain.de/install.php`).
+3. Folge den Anweisungen im Installer, um deine Datenbank-Daten und Sprache einzustellen.
+4. **Wichtig:** Lösche die `install.php` nach der erfolgreichen Installation vom Server!
+
+Das Skript erstellt deine `config.inc.php` automatisch für dich.
 ## Lizenz
 Dieses Projekt ist unter der [GNU GPLv3](LICENSE) lizenziert.
