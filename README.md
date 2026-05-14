@@ -1,6 +1,6 @@
 # PlotSquared & CMI || Luckperms Web Query
 
-Ein einfaches Web-Interface, um Grundstücke von Spielern über die Datenbank von PlotSquared und CMI abzufragen.
+Ein einfaches Web-Interface, um Grundstücke von Spielern über die Datenbank von PlotSquared mit CMI oder Luckperms abzufragen.
 
 ## Features
 * Suche per Spielername (Mojang API Integration) oder UUID.
@@ -15,7 +15,6 @@ Ein einfaches Web-Interface, um Grundstücke von Spielern über die Datenbank vo
 * Funktioniert nur wenn die Datenbanken auf dem gleichen Server sind.
 
 ## Installation
-
 Dank des neuen Installers ist die Einrichtung in Sekunden erledigt:
 
 1. Lade alle Dateien (inklusive der `install.php`) auf deinen Webserver hoch.
@@ -24,5 +23,6 @@ Dank des neuen Installers ist die Einrichtung in Sekunden erledigt:
 4. **Wichtig:** Lösche die `install.php` nach der erfolgreichen Installation vom Server!
 
 Das Skript erstellt deine `config.inc.php` automatisch für dich.
+
 ## Lizenz
 Dieses Projekt ist unter der [GNU GPLv3](LICENSE) lizenziert.
