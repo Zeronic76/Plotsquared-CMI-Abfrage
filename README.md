@@ -25,16 +25,14 @@ Dank des neuen Installers ist die Einrichtung in Sekunden erledigt:
 Das Skript erstellt deine `config.inc.php` automatisch für dich.
 
 ## Update
+Update v2.5.0 - Der "Easy-Setup" Patch
 
-[B]Update v1.2.0 - Der "Easy-Setup" Patch[/B]
+* Web-Installer hinzugefügt: Richte das gesamte Skript grafisch im Browser ein.
+* LuckPerms Integration: Neben CMI wird nun auch LuckPerms als Datenquelle unterstützt.
+* Sicherheits-Update:Verbesserte Prüfung der Konfigurationsdateien.
+* Code-Optimierung: Das Skript ist nun noch schneller und robuster gegen fehlerhafte Datenbank-Einträge.
 
-[LIST]
-[*] [B]Web-Installer hinzugefügt:[/B] Richte das gesamte Skript grafisch im Browser ein.
-[*] [B]LuckPerms Integration:[/B] Neben CMI wird nun auch LuckPerms als Datenquelle unterstützt.
-[*] [B]Sicherheits-Update:[/B] Verbesserte Prüfung der Konfigurationsdateien.
-[*] [B]Code-Optimierung:[/B] Das Skript ist nun noch schneller und robuster gegen fehlerhafte Datenbank-Einträge.
-[/LIST]
-[I]Hinweis: Bitte denkt daran, die install.php nach dem Setup zu löschen![/I]
+Hinweis: Bitte denkt daran, die install.php nach dem Setup zu löschen!
 
 ## Lizenz
 Dieses Projekt ist unter der [GNU GPLv3](LICENSE) lizenziert.
