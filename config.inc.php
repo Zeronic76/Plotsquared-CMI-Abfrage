@@ -29,7 +29,7 @@ return [
 
     // CMI
     'cmi' => [
-        'db'           => 'CMI',
+        'db'           => 'citybuild',
         'table_users'  => 'CMI_users',
         'col_uuid'     => 'player_uuid',
         'col_name'     => 'username'
@@ -43,6 +43,6 @@ return [
         'col_name'     => 'username'
     ],
 
-    // Sprache
+    // Sprache (Default)
     'language' => 'de',
 ];
