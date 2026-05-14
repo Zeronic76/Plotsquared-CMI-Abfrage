@@ -45,4 +45,8 @@ return [
 
     // Sprache (DE RO PL EN)
     'language' => 'de',
+
+    // Servername
+    'server_name' => '',
+
 ];
