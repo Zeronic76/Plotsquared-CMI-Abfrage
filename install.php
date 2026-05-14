@@ -223,11 +223,11 @@ sort($languages);
         <div class="mb-4">
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="player_source" id="s_cmi" value="cmi" <?= ($config['player_source'] ?? 'cmi') === 'cmi' ? 'checked' : '' ?>>
-                <label class="form-check-label" for="s_cmi">CMI</label>
+                <label class="form-check-label text-white-50" for="s_cmi">CMI</label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="player_source" id="s_lp" value="luckperms" <?= ($config['player_source'] ?? '') === 'luckperms' ? 'checked' : '' ?>>
-                <label class="form-check-label" for="s_lp">LuckPerms</label>
+                <label class="form-check-label text-white-50" for="s_lp">LuckPerms</label>
             </div>
         </div>
 
