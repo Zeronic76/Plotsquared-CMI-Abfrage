@@ -1,6 +1,6 @@
 <?php
 /**
- * Configuration for PlotSquared & CMI Web Query
+ * Configuration for PlotSquared & CMI or Luckperms Web Query
  *
  * Project: PlotSquared & CMI Web Query
  * License: GNU General Public License v3.0
