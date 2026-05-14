@@ -1,4 +1,15 @@
 <?php
+/**
+ * Configuration for PlotSquared & CMI Web Query
+ *
+ * Project: PlotSquared & CMI Web Query
+ * License: GNU General Public License v3.0
+ * Copyright (c) 2026 Jörg Stöhrmann/Zeronic76
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation.
+ */
 return [
 
     // Allgemeine Datenbank
