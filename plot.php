@@ -183,7 +183,7 @@ if ($search) {
 
         $sql = "
             (
-                SELECT 
+                SELECT
                     p.id AS plot_id,
                     p.world,
                     p.plot_id_x AS x,
@@ -199,13 +199,13 @@ if ($search) {
             UNION ALL
 
             (
-                SELECT 
+                SELECT
                     p.id AS plot_id,
                     p.world,
                     p.plot_id_x AS x,
                     p.plot_id_z AS z,
                     p.owner AS owner_uuid,
-                    'HELPER' AS role,
+                    'TRUSTED' AS role,
                     u.$colName AS owner_name
                 FROM {$config['table_plot']} p
                 INNER JOIN {$config['table_helpers']} h ON h.plot_plot_id = p.id
@@ -216,13 +216,13 @@ if ($search) {
             UNION ALL
 
             (
-                SELECT 
+                SELECT
                     p.id AS plot_id,
                     p.world,
                     p.plot_id_x AS x,
                     p.plot_id_z AS z,
                     p.owner AS owner_uuid,
-                    'TRUSTED' AS role,
+                    'HELPER' AS role,
                     u.$colName AS owner_name
                 FROM {$config['table_plot']} p
                 INNER JOIN {$config['table_trusted']} t ON t.plot_plot_id = p.id
