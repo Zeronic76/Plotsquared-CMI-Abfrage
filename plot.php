@@ -289,7 +289,20 @@ if ($source === 'luckperms' && !empty($results)) {
 
     <style>
         body { background-color: #0d0d0d; color: #e0e0e0; font-family: sans-serif; }
-        .admin-card { background-color: #1a1a1a; border: 1px solid #333; border-radius: 12px; }
+        
+        /* Fix für abgerundete Ecken und saubere Optik */
+        .admin-card { 
+            background-color: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 12px; 
+            overflow: hidden; /* Wichtig für abgerundete Ecken an der Tabelle */
+        }
+        
+        /* Entfernt die letzte Linie der Tabelle für perfekten Abschluss */
+        .table > :last-child > :last-child > * {
+            border-bottom-width: 0;
+        }
+
         .badge-OWNER { background-color: #d63031; }
         .badge-TRUSTED { background-color: #fdcb6e; color: #000; }
         .badge-HELPER { background-color: #0984e3; }
