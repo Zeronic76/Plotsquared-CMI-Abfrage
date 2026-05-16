@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Plot-Admin',
+    'title' => 'Plottfråga',
     'search_placeholder' => 'Namn eller UUID...',
     'search_btn' => 'SÖK',
     'results_for' => 'Resultat för:',
