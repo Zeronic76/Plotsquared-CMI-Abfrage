@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Plot-Admin',
+    'title' => 'Plot-Query',
     'search_placeholder' => 'Name or UUID...',
     'search_btn' => 'SEARCH',
     'results_for' => 'Results for:',
