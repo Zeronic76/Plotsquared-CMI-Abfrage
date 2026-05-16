@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Administrador de Parcelas',
+    'title' => 'Consulta de trazado',
     'search_placeholder' => 'Nombre o UUID...',
     'search_btn' => 'BUSCAR',
     'results_for' => 'Resultados para:',
