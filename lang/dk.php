@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Plot-Administrator',
+    'title' => 'Plotforespørgsel',
     'search_placeholder' => 'Navn eller UUID...',
     'search_btn' => 'SØG',
     'results_for' => 'Resultater for:',
