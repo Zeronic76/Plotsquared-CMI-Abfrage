@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Plot-Admin',
+    'title' => 'Zapytanie o wykres',
     'search_placeholder' => 'Nazwa lub UUID...',
     'search_btn' => 'SZUKAJ',
     'results_for' => 'Wyniki dla:',
