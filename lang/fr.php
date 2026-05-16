@@ -1,6 +1,6 @@
 php
 $lang = [
-    'title' => 'Admin des Parcelles',
+    'title' => 'Requête de tracé',
     'search_placeholder' => 'Nom ou UUID...',
     'search_btn' => 'RECHERCHER',
     'results_for' => 'Résultats pour :',
