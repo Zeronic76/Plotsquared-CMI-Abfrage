@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Plot-Admin',
+    'title' => 'Pućhipen pal-o grafiko',
     'search_placeholder' => 'Nume sau UUID...',
     'search_btn' => 'CAUTĂ',
     'results_for' => 'Rezultate pentru:',
