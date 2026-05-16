@@ -1,6 +1,6 @@
 <?php
 $lang = [
-    'title' => 'Perceelbeheer',
+    'title' => 'Plot query',
     'search_placeholder' => 'Naam of UUID...',
     'search_btn' => 'ZOEKEN',
     'results_for' => 'Resultaten voor:',
