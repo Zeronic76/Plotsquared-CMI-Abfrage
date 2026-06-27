@@ -43,7 +43,7 @@ return [
         'col_name'     => 'username'
     ],
 
-    // Sprache (DE RO PL EN)
+    // Sprache (de / dk / en / es / fr / nl / pl / ro / se)
     'language' => 'de',
 
     // Servername
