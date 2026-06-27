@@ -1,0 +1,320 @@
+<?php
+/**
+ * Project: PlotSquared / CMI / LuckPerms Web Query
+ * License: GNU General Public License v3.0
+ * Copyright (c) 2026 Jörg Stöhrmann / Zeronic76
+ * Version: 2.6.0
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation.
+ */
+
+// ------------------------------------------------------------
+// LOADER-LOGIK
+// ------------------------------------------------------------
+
+$configPhp = __DIR__ . '/config.php';
+$configInc = __DIR__ . '/config.inc.php';
+
+if (file_exists($configPhp)) {
+    $config = include($configPhp);
+} else {
+    if (!file_exists($configInc)) {
+        $url = "https://raw.githubusercontent.com/Zeronic76/Plotsquared-CMI-Abfrage/main/config.inc.php";
+        $data = @file_get_contents($url);
+
+        if ($data === false) {
+            die("FEHLER: config.inc.php konnte nicht von GitHub geladen werden!");
+        }
+
+        file_put_contents($configInc, $data);
+    }
+
+    header("Location: install.php");
+    exit;
+}
+
+// ------------------------------------------------------------
+// SPRACHE LADEN
+// ------------------------------------------------------------
+
+$langFile = __DIR__ . '/lang/' . ($config['language'] ?? 'de') . '.php';
+
+if (!file_exists($langFile)) {
+    $langFile = __DIR__ . '/lang/de.php'; // Fallback
+}
+
+include $langFile;
+
+// ------------------------------------------------------------
+// DB-VERBINDUNG
+// ------------------------------------------------------------
+
+try {
+    $dsn = "mysql:host={$config['db_host']};port={$config['db_port']};dbname={$config['db_plots']};charset=utf8mb4";
+    $pdo = new PDO($dsn, $config['db_user'], $config['db_pass'], [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
+} catch (Exception $e) {
+    die("Datenbankfehler (PlotSquared): " . $e->getMessage());
+}
+
+// ------------------------------------------------------------
+// NAMENSQUELLE LADEN (CMI oder LuckPerms)
+// ------------------------------------------------------------
+
+$source   = $config['player_source'];
+$userCfg  = $config[$source];
+
+$dbUserSys  = $userCfg['db'];
+$tableUsers = $userCfg['table_users'];
+$colUUID    = $userCfg['col_uuid'];
+$colName    = $userCfg['col_name'];
+
+// ------------------------------------------------------------
+// EINGABE & VARIABLEN-INIT
+// ------------------------------------------------------------
+
+$search = isset($_GET['query']) ? trim($_GET['query']) : '';
+$results = [];
+$displayName = "";
+$uuid = "";
+$errorMsg = "";
+$displayUUID = "";
+$type = "";
+
+// ------------------------------------------------------------
+// AUTOMATISCHE ERKENNUNG: NAME ODER UUID
+// ------------------------------------------------------------
+
+if ($search) {
+    if (preg_match('/^[0-9a-fA-F-]{32,36}$/', $search)) {
+        $type = 'uuid';
+    } else {
+        $type = 'name';
+    }
+}
+
+// ------------------------------------------------------------
+// UUID OHNE BINDSTRICHE AUTOMATISCH FORMATIEREN
+// ------------------------------------------------------------
+
+if ($search && $type === 'uuid') {
+    $clean = str_replace('-', '', $search);
+
+    if (strlen($clean) === 32) {
+        $search = substr($clean, 0, 8) . '-' .
+                  substr($clean, 8, 4) . '-' .
+                  substr($clean, 12, 4) . '-' .
+                  substr($clean, 16, 4) . '-' .
+                  substr($clean, 20);
+    }
+
+    $displayUUID = strtolower($search);
+}
+
+// ------------------------------------------------------------
+// UUID / NAME ERMITTELN
+// ------------------------------------------------------------
+
+if ($search) {
+    if ($type === 'name') {
+        $api_url = "https://api.mojang.com/users/profiles/minecraft/" . urlencode($search);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $api_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WebQuery/2.6');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4); // Erzwingt IPv4 und umgeht IPv6-Probleme
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code === 200 && $response) {
+            $mojang = json_decode($response, true);
+
+            if (!empty($mojang['id'])) {
+                $raw = $mojang['id'];
+                // UUID mit Bindestrichen formatieren
+                $uuid = substr($raw,0,8)."-".substr($raw,8,4)."-".substr($raw,12,4)."-".substr($raw,16,4)."-".substr($raw,20);
+                $displayName = $mojang['name'];
+                $displayUUID = strtolower($uuid);
+            } else {
+                $errorMsg = $lang['error_mojang'];
+            }
+        } elseif ($http_code === 204 || $http_code === 404) {
+            $errorMsg = "Spielername '" . htmlspecialchars($search) . "' existiert nicht bei Mojang.";
+        } elseif ($http_code === 429) {
+            $errorMsg = "Mojang-API blockiert gerade (Rate-Limit). Bitte kurz warten oder UUID nutzen.";
+        } else {
+            $errorMsg = $lang['error_mojang'] . " (HTTP-Status: " . $http_code . ")";
+        }
+    } else {
+        $uuid = $search;
+        $displayUUID = strtolower($uuid);
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT $colName
+                FROM $dbUserSys.$tableUsers
+                WHERE $colUUID = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$uuid]);
+            $row = $stmt->fetch();
+
+            $displayName = $row ? $row[$colName] : "Unknown Player";
+        } catch (Exception $e) {
+            $errorMsg = "Fehler bei der Namensauflösung: " . $e->getMessage();
+        }
+
+        // LUCKPERMS: ECHTEN MOJANG-NAMEN FÜR DEN GESUCHTEN SPIELER HOLEN
+        if ($source === 'luckperms' && $uuid) {
+            $mojang_api = "https://sessionserver.mojang.com/session/minecraft/profile/" . str_replace('-', '', $uuid);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $mojang_api);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WebQuery/2.6');
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            $mojang_json = curl_exec($ch);
+            curl_close($ch);
+
+            if ($mojang_json) {
+                $mojang_data = json_decode($mojang_json, true);
+
+                if (!empty($mojang_data['name'])) {
+                    $displayName = $mojang_data['name'];
+                }
+            }
+        }
+    }
+    // ------------------------------------------------------------
+    // PLOT-ABFRAGE INKLUSIVE FLAGS & NEUER SORTIERUNG
+    // ------------------------------------------------------------
+
+    if ($uuid && !$errorMsg) {
+        $sql = "
+            (
+                SELECT
+                    p.id AS plot_id,
+                    p.world,
+                    p.plot_id_x AS x,
+                    p.plot_id_z AS z,
+                    p.owner AS owner_uuid,
+                    'OWNER' AS role,
+                    u.$colName AS owner_name,
+                    (
+                        SELECT GROUP_CONCAT(CONCAT(f.flag, ': ', f.value) SEPARATOR ' | ')
+                        FROM plot_flags f
+                        WHERE f.plot_id = p.id
+                    ) AS flags
+                FROM {$config['table_plot']} p
+                LEFT JOIN $dbUserSys.$tableUsers u ON p.owner = u.$colUUID
+                WHERE p.owner = :uuid
+            )
+            UNION ALL
+            (
+                SELECT
+                    p.id AS plot_id,
+                    p.world,
+                    p.plot_id_x AS x,
+                    p.plot_id_z AS z,
+                    p.owner AS owner_uuid,
+                    'TRUSTED' AS role,
+                    u.$colName AS owner_name,
+                    (
+                        SELECT GROUP_CONCAT(CONCAT(f.flag, ': ', f.value) SEPARATOR ' | ')
+                        FROM plot_flags f
+                        WHERE f.plot_id = p.id
+                    ) AS flags
+                FROM {$config['table_plot']} p
+                INNER JOIN {$config['table_helpers']} h ON h.plot_plot_id = p.id
+                LEFT JOIN $dbUserSys.$tableUsers u ON p.owner = u.$colUUID
+                WHERE h.user_uuid = :uuid
+            )
+            UNION ALL
+            (
+                SELECT
+                    p.id AS plot_id,
+                    p.world,
+                    p.plot_id_x AS x,
+                    p.plot_id_z AS z,
+                    p.owner AS owner_uuid,
+                    'HELPER' AS role,
+                    u.$colName AS owner_name,
+                    (
+                        SELECT GROUP_CONCAT(CONCAT(f.flag, ': ', f.value) SEPARATOR ' | ')
+                        FROM plot_flags f
+                        WHERE f.plot_id = p.id
+                    ) AS flags
+                FROM {$config['table_plot']} p
+                INNER JOIN {$config['table_trusted']} t ON t.plot_plot_id = p.id
+                LEFT JOIN $dbUserSys.$tableUsers u ON p.owner = u.$colUUID
+                WHERE t.user_uuid = :uuid
+            )
+            ORDER BY FIELD(role, 'OWNER', 'TRUSTED', 'HELPER') ASC, world ASC, plot_id ASC
+        ";
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(['uuid' => $uuid]);
+            $results = $stmt->fetchAll();
+        } catch (Exception $e) {
+            $errorMsg = "Fehler bei der Plot-Abfrage: " . $e->getMessage();
+        }
+    }
+}
+
+// ------------------------------------------------------------
+// LUCKPERMS: MOJANG-NAMEN FÜR ALLE OWNER (OWNER/HELPER/TRUSTED)
+// ------------------------------------------------------------
+
+$mojangCache = [];
+
+if ($source === 'luckperms' && !empty($results)) {
+    foreach ($results as &$plot) {
+        $ownerUuid = $plot['owner_uuid'] ?? null;
+
+        if (!$ownerUuid) {
+            continue;
+        }
+
+        $cleanUuid = str_replace('-', '', $ownerUuid);
+
+        if (isset($mojangCache[$cleanUuid])) {
+            $plot['owner_name'] = $mojangCache[$cleanUuid];
+            continue;
+        }
+
+        $mojang_api = "https://sessionserver.mojang.com/session/minecraft/profile/" . $cleanUuid;
+        $mojang_json = @file_get_contents($mojang_api);
+
+        if ($mojang_json) {
+            $mojang_data = json_decode($mojang_json, true);
+
+            if (!empty($mojang_data['name'])) {
+                $mojangCache[$cleanUuid] = $mojang_data['name'];
+                $plot['owner_name']      = $mojang_data['name'];
+            }
+        }
+    }
+    unset($plot);
+}
+
+// ------------------------------------------------------------
+// TEMPLATE WEICHE
+// ------------------------------------------------------------
+
+$activeTemplate = $config['template'] ?? 'default';
+$templatePath = __DIR__ . '/templates/' . $activeTemplate . '/template.php';
+
+if (file_exists($templatePath)) {
+    include_once $templatePath;
+} else {
+    include_once __DIR__ . '/templates/default/template.php';
+}
